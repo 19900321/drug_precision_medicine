@@ -1,0 +1,24 @@
+{
+    "id": "F7ECF229",
+    "path": "C:/Users/yinyin/Desktop/Project/GDSC-drug-modules/DEGs/dge_covid.R",
+    "project_path": "dge_covid.R",
+    "type": "r_source",
+    "hash": "286668785",
+    "contents": "",
+    "dirty": false,
+    "created": 1608324257930.0,
+    "source_on_save": false,
+    "relative_order": 2,
+    "properties": {
+        "cursorPosition": "60,0",
+        "scrollLine": "46"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1608324683,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1608324683569,
+    "read_only": false,
+    "read_only_alternatives": []
+}

@@ -1,0 +1,60 @@
+# if (!requireNamespace("BiocManager", quietly = TRUE))
+#   install.packages("BiocManager")
+# 
+BiocManager::install("limma")
+
+library(limma)
+# if (!requireNamespace("BiocManager", quietly = TRUE))
+#   install.packages("BiocManager")
+# BiocManager::install()
+# BiocManager::install(c("GenomicFeatures", "AnnotationDbi"))
+BiocManager::install(c("DESeq2"))
+BiocManager::install(c("limma"))
+
+library(DESeq2)
+library(limma)
+
+# read input gene expression data
+cts <- as.matrix(read.csv(file="Bortezomib_gene.txt", sep = '\t', header = T,row.names=1))
+# rownames(cts) = seq(from=1, to=nrow(cts))
+# mode(cts) <- "integer"
+# read the annotation for samples
+coldata <- read.csv(file="Bortezomib_annotation.txt", sep = '\t', row.names=1)
+# prepared the data to DEseq2 need
+dds <- DESeqDataSetFromMatrix(countData = cts,
+                              colData = coldata,
+                              design = ~ condition)
+
+# filters those with low count value less than 10
+dds <- dds[rowSums(counts(dds)) >= 10,]
+
+# factor the condition label that we use to get DEGs
+dds$condition <- factor(dds$condition)
+
+# calculate the DEGs and resort by p value ( p values ...)
+dds <- DESeq(dds)
+res <- results(dds)
+resOrdered <- res[order(res$pvalue),]
+summary(res)
+
+# select those padj less than 0.1
+resSig <- as.matrix(subset(resOrdered, padj < 0.1))
+
+result = as.data.frame(res)
+
+# output
+write.csv(as.data.frame(res), 
+          file="results/deg/resordered-padj-0.1.csv")
+
+
+
+# 
+mask <- with(result, log2FoldChange > 2 & padj < .01)
+mask_2 <- with(result, log2FoldChange < -2 & padj < .01)
+cols <- ifelse(mask,"red",ifelse(mask_2,"dodgerblue","black"))
+
+with(result, plot(log2FoldChange, -log10(padj),cex=.8, pch=16,col = cols,
+                    xlab="log2 Fold change"))
+
+abline(h=2,v=c(-2,2), lty=2)
+
