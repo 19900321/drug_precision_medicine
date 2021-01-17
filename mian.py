@@ -24,6 +24,9 @@ from DEGs.files_preparation import prepare_groups_by_commonpass,map_DEG, prepare
 from DEGs.get_common_genes import get_common_genes_one
 from clusters.cluster_patients_by_genes import prepare_pateints,cluster_pateints
 from ml_model import ml
+from survival import correlation_g_p, surve_kaplanmeier
+from geo import  analysis_and_plot
+
 # drugs = drug_df.columns
 # for direction in ['PCM','NCM']:
 #     for drug in tqdm(drugs,desc='%s'%direction):
@@ -36,6 +39,7 @@ from ml_model import ml
 #     for drug in ['Bortezomib']:
 #         output = 'results/hotnet/%s/%s/'%(direction,drug)
 #         src.run_iteratively_hotnet('results/hotnet_input/%s/%s.tsv'%(direction,drug),output)
+
 
 def run_one(direction_drug_list):
     direction, drug = direction_drug_list[0],direction_drug_list[1]
@@ -205,7 +209,7 @@ def validation_gene():
     def get_common_gene_final(table_dict):
         for r_method in ['deseq2','edgeR']:
             for drug_type_name, values in table_dict.items():
-                for cor_type in ['raw','after_module']:
+                for cor_type in ['raw', 'after_module']:
                     for overlap_list_str in ['module_clinical_singlecor',
                                              'clinical_singlecor',
                                              'module_clinical',
@@ -234,4 +238,7 @@ def cluster_patentis():
 if __name__ == "__main__":
     #validation_gene()
     #cluster_patentis()
-    ml.main()
+    # ml.main()
+    # correlation_g_p.main()
+    # surve_kaplanmeier.main()
+    analysis_and_plot.main()
