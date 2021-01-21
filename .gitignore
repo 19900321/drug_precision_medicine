@@ -154,9 +154,23 @@ env/*
 
 result/*
 res*/*
+results/*
+data/*
+
+original_data/*
+
+process_data/*
+reference/*
+env/*
+
+result/*
+res*/*
 
 /data/*
 
 v1/*
+
+
+
 
 

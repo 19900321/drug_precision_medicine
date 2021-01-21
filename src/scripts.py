@@ -49,25 +49,38 @@ def prepare_drug_gene(gene_data, patient_drug_data):
         drug_data_2 = drug_data.loc[:, ~((drug_data <= 5) | (drug_data.isnull())).all(axis=0)]
         print('{} drug at least one drug reponase DSS less than 5 except nan'.format(drug_data_2.shape[0]))
         # keep only patients for gene expresision
-        gene_data = gene_data.loc[drug_data_2.index, :]
-        return  gene_data,drug_data_2
+        gene_data = gene_data.loc[drug_data.index, :]
+        return gene_data, drug_data_2
 
     gene_data_2 = prepare_gene_data_2(gene_data)
     gene_data_3, drug_data_3 = prepare_drug_data_simple(patient_drug_data, gene_data_2)
-    return  gene_data_3, drug_data_3
+    return gene_data_3, drug_data_3
+
 
 def make_output_folders():
-    folders = ['../results/','../results/hotnet_input/','../results/hotnet_input/PCM','../results/hotnet_input/NCM','../results/diamond/','../results/diamond/PCM',
-    '../results/diamond/NCM','../results/hotnet/','../results/hotnet/PCM','../results/hotnet/','../results/reactome_gsea','../results/final_modules']
+    folders = ['../results/',
+               '../results/hotnet_input/',
+               '../results/hotnet_input/PCM',
+               '../results/hotnet_input/NCM',
+               '../results/diamond/',
+               '../results/diamond/PCM',
+               '../results/diamond/NCM',
+               '../results/hotnet/',
+               '../results/hotnet/PCM',
+               '../results/hotnet/',
+               '../results/reactome_gsea',
+               '../results/final_modules']
     for folder in folders:
         try:
             os.mkdir(folder)
         except:
             continue
 
-def get_correlations_2(expr_df,drug_df):
+def get_correlations_2(expr_df, drug_df):
     drugs = sorted(drug_df.columns)
+
     genes = sorted(expr_df.columns)
+
     pval_gene_fdr = []
     #Iterating across drugs
     cor_values_one = []
@@ -90,17 +103,21 @@ def get_correlations_2(expr_df,drug_df):
         for gene in genes:
             gene_vector = X_expr[gene]
             #Pearson correlation
-            r,pval = stats.spearmanr(gene_vector,drug_vector)
-            cor_values_one.append([drug, gene,r, pval])
+            r,pval = stats.spearmanr(gene_vector, drug_vector)
+            cor_values_one.append([drug, gene, r, pval])
             pval_gene.append(pval)
         pval_gene_fdr += list(fdr_my(pval_gene))
 
+
     # generate dataframe
-    cor_pd_stack = pd.DataFrame(cor_values_one, columns=['drug', 'gene', 'cor','pvalue'])
+    cor_pd_stack = pd.DataFrame(cor_values_one, columns=['drug', 'gene', 'cor', 'pvalue'])
     cor_pd_stack['fdr'] = pval_gene_fdr
 
-    cor_pd = cor_pd_stack.pivot_table(values='cor', index=['drug'], columns=['gene'])
-    return cor_pd,cor_pd_stack
+    cor_pd = cor_pd_stack.pivot_table(values='cor', index=['gene'], columns=['drug'])
+    pvalue_pd = cor_pd_stack.pivot_table(values='pvalue', index=['gene'], columns=['drug'])
+    fdr_pd = cor_pd_stack.pivot_table(values='fdr', index=['gene'], columns=['drug'])
+    return cor_pd, cor_pd_stack, pvalue_pd, fdr_pd
+
 
 def get_correlations(expr_df,drug_df,write=None):
 
@@ -129,7 +146,7 @@ def get_correlations(expr_df,drug_df,write=None):
     stack = np.asarray(stack,dtype=object)
 
     #Normalizing the correlactions
-    stack = np.c_[stack,np.arctanh(list(stack[:,2]))]
+    stack = np.c_[stack, np.arctanh(list(stack[:,2]))]
 
     #Getting Z-corr and building the matrix
     n_genes = len(genes)

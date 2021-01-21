@@ -26,6 +26,7 @@ from clusters.cluster_patients_by_genes import prepare_pateints,cluster_pateints
 from ml_model import ml
 from survival import correlation_g_p, surve_kaplanmeier
 from geo import  analysis_and_plot
+from correlation import drug_response_correlation
 
 # drugs = drug_df.columns
 # for direction in ['PCM','NCM']:
@@ -241,4 +242,5 @@ if __name__ == "__main__":
     # ml.main()
     # correlation_g_p.main()
     # surve_kaplanmeier.main()
-    analysis_and_plot.main()
+    # analysis_and_plot.main()
+    drug_response_correlation.main()

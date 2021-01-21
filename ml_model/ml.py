@@ -114,6 +114,13 @@ def ensembol_gene_symbol(ensembol_ids):
             continue
     return uni_dict
 
+def ensembol_gene_symbol_pd(df,col_gene, symol_dict=None):
+    sembol_genes=list(df[col_gene])
+    if symol_dict == None:
+        symol_dict = ensembol_gene_symbol(sembol_genes)
+    df.insert(1, 'symbol', df[col_gene].apply(lambda x:symol_dict[x] if x in symol_dict else None))
+    return df
+
 
 # firstly prepare the drug data , gene data
 def prepare_drug_gene_data():
