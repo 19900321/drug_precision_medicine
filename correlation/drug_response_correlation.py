@@ -4,6 +4,7 @@ import pickle
 from src.scripts import get_correlations_2, prepare_drug_gene
 from ml_model.ml import ensembol_gene_symbol_pd
 
+
 def prepare_mm_ens_symbol():
     gene_data = pd.read_csv('data/MM_log2RPKM_expression_123_20200918.txt', sep='\t', )
     gene_ens_sym_dict= dict(zip(gene_data['EnsemblID'], gene_data['Gene']))

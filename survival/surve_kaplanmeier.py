@@ -11,7 +11,7 @@ import pickle
 import tqdm
 import multiprocessing as mp
 import matplotlib.gridspec as gridspec
-from commonpass.data_process import ensembol_gene_symbol_pd_folder
+from commonpass.commpass_data_process import ensembol_gene_symbol_pd_folder
 
 # lifetimes :https://lifelines.readthedocs.io/en/latest/
 
@@ -167,7 +167,7 @@ def compare_groups(gene_1, ttc, cens, g, pateint_group_dict, cut_percent, anno_g
     if not os.path.exists(path_saved):
         os.makedirs(path_saved)
 
-    plt.savefig('{}/{}_{}_{}_KMF_curve.png'.format(path_saved, g, gene, cut_percent))
+    plt.savefig('{}/{}_{}_{}_{}_KMF_curve.png'.format(path_saved, g, gene, cens, cut_percent))
 
     # plot density
     # ax2 = plt.subplot(111)
@@ -230,5 +230,7 @@ def all_gene_logrank_mutiple( pateint_group_dict, cens, ttc, cut_percent, path_s
 
         # pateint_group_dict[g].update({'logrank_result_{}_{}'.format(cens, cut_percent*100): logrank_result,
         #                               'logrank_pd_{}_{}'.format(cens, cut_percent*100): logrank_pd})
+        if not os.path.exists(path_saved):
+            os.makedirs(path_saved)
         logrank_pd.to_csv(path_saved + 'logrank&{}&{}_{}.csv'.format(g, cens, cut_percent*100), index=None)
     return pateint_group_dict

@@ -18,6 +18,8 @@ def prepare_pateint_info(ges_obj):
     'Did_Patient_Die(0=No,1=Yes)': 'censos',
     'Days_Survived_From_Randomization': 'ttos'}
     info_pd = info_pd.rename(columns=replace_dict)
+    info_pd['censos'] = info_pd['censos'].fillna(0)
+    info_pd['ttos'] = info_pd['ttos'].fillna(0)
     info_pd.insert(0, column='sample_id', value=list(info_pd.index))
     return info_pd
 

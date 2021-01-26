@@ -25,8 +25,9 @@ from DEGs.get_common_genes import get_common_genes_one
 from clusters.cluster_patients_by_genes import prepare_pateints,cluster_pateints
 from ml_model import ml
 from survival import correlation_g_p, surve_kaplanmeier
-from geo import  analysis_and_plot
+from geo import geo_analysis_and_plot,geo_read_samples, geo_run_logrank
 from correlation import drug_response_correlation
+from commonpass import commpass_run_logrank, commpass_plot_kmf
 
 # drugs = drug_df.columns
 # for direction in ['PCM','NCM']:
@@ -237,10 +238,16 @@ def cluster_patentis():
 
 
 if __name__ == "__main__":
-    #validation_gene()
+    # validation_gene()
     #cluster_patentis()
     # ml.main()
     # correlation_g_p.main()
     # surve_kaplanmeier.main()
     # analysis_and_plot.main()
-    drug_response_correlation.main()
+    # drug_response_correlation.main()
+    # geo_read_samples.main()
+    # geo_run_logrank.main()
+    # geo_analysis_and_plot.main()
+    # commpass_run_logrank.main()
+    commpass_plot_kmf.main()
+

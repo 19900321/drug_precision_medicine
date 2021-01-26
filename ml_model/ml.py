@@ -299,6 +299,7 @@ def prepare_prediction_result(result_dict):
     extend_coef_pd = extend_gene_coef_s(result_pd)
     return result_pd,extend_coef_pd
 
+# Todo: ALIDATION BY CLINICAL PATEINTS BY BEST LINEAR MODEL BY 10 GENES
 
 def merge_result(pathes):
     all_result_filter = []
