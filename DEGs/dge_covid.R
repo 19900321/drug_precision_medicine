@@ -14,7 +14,7 @@ library(DESeq2)
 library(limma)
 
 #args = commandArgs(trailingOnly=TRUE)
-path_saved = ''
+path_saved = '../results/deg/'
 
 file_list = c('bor_all_line', 
               'bor_dex_1_line',
@@ -24,7 +24,7 @@ file_list = c('bor_all_line',
 
 for (drug_type_name in file_list){
   # read input gene expression data
-  cts <- as.matrix(read.csv(file=paste0(path_saved,drug_type_name,'_gene.txt'), 
+  cts <- as.matrix(read.csv(file=paste0(path_saved,'prepared_data/',drug_type_name,'_gene.txt'), 
                             sep = '\t',
                             header = T, 
                             row.names = 'GENE_ID'))
@@ -32,7 +32,7 @@ for (drug_type_name in file_list){
   # mode(cts) <- "integer"
   # read the annotation for samples
   
-  coldata <- read.csv(file=paste0(path_saved, drug_type_name,'_annotation.txt'),
+  coldata <- read.csv(file=paste0(path_saved, 'prepared_data/', drug_type_name,'_annotation.txt'),
                       sep = '\t',  row.names=1)
   # prepared the data to DEseq2 need
   dds <- DESeqDataSetFromMatrix(countData = cts,
@@ -58,9 +58,10 @@ for (drug_type_name in file_list){
   
   # output
   write.csv(as.data.frame(resSig), 
-            file=paste0(path_saved,'deseq2/',drug_type_name,'_0.05.csv'))
+             file=paste0(path_saved,'deseq2/',drug_type_name,'_0.05.csv'))
   
-  
+  write.csv(as.data.frame(result), 
+            file=paste0(path_saved,'deseq2/',drug_type_name,'_all.csv'))
   
   # 
   # mask <- with(result, log2FoldChange > 2 & padj < .01)

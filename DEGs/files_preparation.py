@@ -2,7 +2,7 @@ import pandas as pd
 import os
 import pickle
 from ml_model.ml import ensembol_gene_symbol,get_final_columns_dict
-
+from commonpass.commpass_data_process import ensembol_gene_symbol_pd_folder
 
 def generate_annotation( patients_n, patients_p):
     lable_pd = []
@@ -141,3 +141,5 @@ def map_DEG(r_method,drug_type_name):
     group_gene['symbol'] = group_gene['ensmbol'].apply(lambda x:symol_dict[x] if x in symol_dict else None)
     group_gene.to_csv('DEGs/{}/{}_0.05.csv'.format(r_method, drug_type_name))
 
+def map_DEG_2():
+    ensembol_gene_symbol_pd_folder('results/deg/edgeR/','Unnamed: 0')

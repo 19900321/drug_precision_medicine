@@ -1,6 +1,6 @@
 #BiocManager::install(c("edgeR"))
 library(edgeR)
-path_saved = ''
+path_saved = '../results/deg/'
 
 file_list = c('bor_all_line', 
               'bor_dex_1_line',
@@ -11,7 +11,7 @@ file_list = c('bor_all_line',
 
 for (drug_type_name in file_list){
   # read input gene expression data
-  cts <- read.csv(file=paste0(path_saved,drug_type_name,'_gene.txt'), 
+  cts <- read.csv(file=paste0(path_saved,'prepared_data/',drug_type_name,'_gene.txt'), 
                             sep = '\t',
                             header = T, 
                             row.names = 'GENE_ID')
@@ -19,7 +19,7 @@ for (drug_type_name in file_list){
   # mode(cts) <- "integer"
   # read the annotation for samples
   
-  coldata <- read.csv(file=paste0(path_saved, drug_type_name,'_annotation.txt'),
+  coldata <- read.csv(file=paste0(path_saved, 'prepared_data/', drug_type_name,'_annotation.txt'),
                       sep = '\t',  row.names=1)
   # Creating a DGEList object
   dgList <- DGEList(counts=cts, genes=rownames(cts))
@@ -50,10 +50,18 @@ for (drug_type_name in file_list){
   resSig = topTags( contrast_p_v_n,nrow(cts))
   result = resSig$table
   result <- result[order(result$logFC),]
-  result <- subset(result, FDR < 0.05 & abs(logFC)>0.5)
+  result_sig <- subset(result, FDR < 0.05 & abs(logFC)>0.5)
+  result_sig$padj <- result_sig$FDR
+  result_sig$log2FoldChange = result_sig$logFC
+  result_sig$pvalue <- result_sig$PValue
+  
   result$log2FoldChange = result$logFC
+  result$pvalue <- result$PValue
+  result$padj <- result$FDR
   
   # output
-  write.csv(as.data.frame(result), 
+  write.csv(as.data.frame(result_sig), 
             file=paste0(path_saved,'edgeR/', drug_type_name,'_0.05.csv'))
+  write.csv(as.data.frame(result), 
+            file=paste0(path_saved,'edgeR/',drug_type_name,'_all.csv'))
 }
