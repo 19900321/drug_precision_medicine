@@ -100,9 +100,9 @@ def prepare_groups_by_commonpass_processed(sheet_name, dataset_gene, type):
 
     pateints_pd = pd.read_excel('data/sample selection_compass.xlsx',
                                 sheet_name=sheet_name)
-    pateints_pd = pateints_pd.drop_duplicates(subset=['group', 'gene_patient_id'],keep='first')
+    pateints_pd = pateints_pd.drop_duplicates(subset=['group', 'gene_patient_id'], keep='first')
 
-    patients_n_selected = list(pateints_pd.loc[pateints_pd['group'] == 'NR','gene_patient_id'])
+    patients_n_selected = list(pateints_pd.loc[pateints_pd['group'] == 'NR', 'gene_patient_id'])
     patients_p_selected = list(pateints_pd.loc[pateints_pd['group'] == 'R', 'gene_patient_id'])
     label_pd = generate_annotation(patients_n_selected, patients_p_selected)
 
@@ -140,6 +140,7 @@ def map_DEG(r_method,drug_type_name):
     group_gene['ensmbol'] = list(group_gene.index)
     group_gene['symbol'] = group_gene['ensmbol'].apply(lambda x:symol_dict[x] if x in symol_dict else None)
     group_gene.to_csv('DEGs/{}/{}_0.05.csv'.format(r_method, drug_type_name))
+
 
 def map_DEG_2():
     ensembol_gene_symbol_pd_folder('results/deg/edgeR/','Unnamed: 0')

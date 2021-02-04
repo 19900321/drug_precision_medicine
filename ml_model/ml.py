@@ -35,6 +35,7 @@ from sklearn.datasets import make_friedman1
 from sklearn.feature_selection import RFE
 from sklearn.svm import SVR
 
+
 def stepwise_selection(X, y,
                        initial_list=[],
                        threshold_in=0.01,
@@ -55,7 +56,7 @@ def stepwise_selection(X, y,
     """
     included = initial_list
     while True:
-        changed=False
+        changed = False
         # forward step
         excluded = list(set(X.columns)-set(included))
         new_pval = pd.Series(index=excluded)
@@ -185,7 +186,7 @@ def dmr(X_train, X_test, y_train, y_test):
 
 
 
-def test_one_drug(dataset, drug, final_columns_dict,type_index,scale):
+def test_one_drug(dataset, drug, final_columns_dict, type_index, scale):
 
     def genrate_linear(X_train, X_test, y_train, y_test):
         clf = LinearRegression()
@@ -209,12 +210,12 @@ def test_one_drug(dataset, drug, final_columns_dict,type_index,scale):
         plt.scatter(expected, predicted)
         plt.show()
 
-        return clf, MSE,coeffient, cor, p_value
+        return clf, MSE, coeffient, cor, p_value
 
 
     def varibale_rank(linear_model,X_columns,X_symbol_dict ):
         # check the coef od each column
-        gene_symbol= [X_symbol_dict[i] if i in X_symbol_dict else None for i in X_columns]
+        gene_symbol = [X_symbol_dict[i] if i in X_symbol_dict else None for i in X_columns]
         gene_coef_s = list(zip(columns_selected, gene_symbol, linear_model.coef_[0]))
         gene_coef_s = sorted(gene_coef_s, key=itemgetter(2), reverse=True)
         return gene_coef_s
@@ -235,50 +236,52 @@ def test_one_drug(dataset, drug, final_columns_dict,type_index,scale):
 
     columns_selected = final_columns_dict[drug][type_index]
     X_symbol_dict = ensembol_gene_symbol(columns_selected)
-    X_train, X_test, y_train, y_test,feature_selected = prepare_data(dataset, drug, columns_selected,scale)
+    X_train, X_test, y_train, y_test, feature_selected = prepare_data(dataset, drug, columns_selected,scale)
 
-    feature_selected_symbol = [X_symbol_dict[g] if g in X_symbol_dict else None for g in feature_selected ]
+    feature_selected_symbol = [X_symbol_dict[g] if g in X_symbol_dict else None for g in feature_selected]
     print('the selected feature is'.format(','.join(feature_selected_symbol)))
-    clf, MSE,coeffient, cor, p_value = genrate_linear(X_train, X_test, y_train, y_test)
+    clf, MSE, coeffient, cor, p_value = genrate_linear(X_train, X_test, y_train, y_test)
     gene_coef_s = varibale_rank(clf,feature_selected, X_symbol_dict )
-    return clf, MSE,coeffient, cor, p_value, gene_coef_s
+    return clf, MSE, coeffient, cor, p_value, gene_coef_s, feature_selected
 
-def drugs_prediction(drugs, dataset, final_columns_dict,scale):
+def drugs_prediction(drugs, dataset, final_columns_dict, scale):
     result_dict_all = {}
-    type_index = [0,1,2]
+    type_index = [0, 1, 2]
     for d in drugs:
         result_dict = {}
         for type_index_one in type_index:
             if len(final_columns_dict[d][type_index_one]) >5:
-                clf, MSE,coeffient, cor, p_value, gene_coef_s = test_one_drug(dataset, d, final_columns_dict, type_index_one,scale)
-                result_dict[type_index_one] = {'clf':clf,
-                                  'MSE':MSE,
-                                  'coeffient':coeffient,
-                                  'cor':cor,
-                                  'p_value':p_value,
-                                  'gene_coef_s':gene_coef_s}
+                clf, MSE,coeffient, cor, p_value, gene_coef_s, feature_selected = test_one_drug(dataset, d, final_columns_dict, type_index_one,scale)
+                result_dict[type_index_one] = {'clf': clf,
+                                              'MSE': MSE,
+                                              'coeffient': coeffient,
+                                              'cor': cor,
+                                              'p_value': p_value,
+                                              'gene_coef_s':gene_coef_s,
+                                               'feature_selected': feature_selected}
         result_dict_all[d] = result_dict
     return result_dict_all
 
 
-def model_prediction(pathes, drugs, dataset, scale = True):
+def model_prediction(pathes, drugs, dataset, file_name, scale=True):
     for module_path in pathes:
         data_saved = pickle.load(open(module_path + 'result.out', 'rb'))
         final_columns_dict = get_final_columns_dict(drugs, data_saved)
-        result_dict = drugs_prediction(drugs, dataset, final_columns_dict,scale)
-        if scale ==True:
-            with open(module_path + 'linear_reuslt_cut_scale','wb') as handle:
-                pickle.dump(result_dict,handle)
+        result_dict = drugs_prediction(drugs, dataset, final_columns_dict, scale)
+        if scale == True:
+            with open(module_path + 'linear_reuslt_{}_scale'.format(file_name), 'wb') as handle:
+                pickle.dump(result_dict, handle)
         else:
-            with open(module_path + 'linear_reuslt_cut','wb') as handle:
-                pickle.dump(result_dict,handle)
+            with open(module_path + 'linear_reuslt_{}'.format(file_name), 'wb') as handle:
+                pickle.dump(result_dict, handle)
 
 
 # prepare ML result
 def prepare_prediction_result(result_dict):
-    result_pd = pd.concat([pd.DataFrame(d).T for d in list(result_dict.values())], keys = list(result_dict.keys()) ).reset_index()
-    result_pd = result_pd.rename(columns={'level_0':'drug','level_1':'module'})
-    result_pd['module'] = result_pd['module'].astype(str).replace('0','all_module').replace('1','module_1').replace('2','module_2')
+    result_pd = pd.concat([pd.DataFrame(d).T for d in list(result_dict.values())], keys=list(result_dict.keys())).reset_index()
+    result_pd = result_pd.rename(columns={'level_0': 'drug',
+                                          'level_1': 'module'})
+    result_pd['module'] = result_pd['module'].astype(str).replace('0', 'all_module').replace('1', 'module_1').replace('2', 'module_2')
     result_pd = result_pd.drop(columns=['clf'])
 
     def extend_gene_coef_s(result_pd):
@@ -288,61 +291,63 @@ def prepare_prediction_result(result_dict):
                 extend_coef_pd.append([rows.drug, rows.module, rows.cor, rows.p_value] + list(record))
 
         extend_coef_pd = pd.DataFrame(extend_coef_pd, columns=['drug',
-                                              'module',
-                                              'cor',
-                                              'p_value',
-                                              'gene_sembol',
-                                              'gene_symbol',
-                                              'gene_coef'])
+                                                                  'module',
+                                                                  'cor',
+                                                                  'p_value',
+                                                                  'gene_sembol',
+                                                                  'gene_symbol',
+                                                                  'gene_coef'])
         return extend_coef_pd
 
     extend_coef_pd = extend_gene_coef_s(result_pd)
-    return result_pd,extend_coef_pd
+    return result_pd, extend_coef_pd
 
 # Todo: ALIDATION BY CLINICAL PATEINTS BY BEST LINEAR MODEL BY 10 GENES
 
-def merge_result(pathes):
+def merge_result(pathes, file_name):
     all_result_filter = []
     all_extend_coef_result = []
     for module_path in pathes:
-        result_scale = pickle.load(open(module_path + 'linear_reuslt_cut_scale','rb'))
-        result = pickle.load(open(module_path + 'linear_reuslt_cut', 'rb'))
-        result_pd_scale,extend_coef_pd_scale = prepare_prediction_result(result_scale)
-        result_pd_no_scale,extend_coef_pd_no_scale = prepare_prediction_result(result)
-        all_result = pd.concat([result_pd_scale,result_pd_no_scale],
+        result_scale = pickle.load(open(module_path + 'linear_reuslt_{}_scale'.format(file_name),'rb'))
+        result = pickle.load(open(module_path + 'linear_reuslt_{}'.format(file_name), 'rb'))
+        result_pd_scale, extend_coef_pd_scale = prepare_prediction_result(result_scale)
+        result_pd_no_scale, extend_coef_pd_no_scale = prepare_prediction_result(result)
+        all_result = pd.concat([result_pd_scale, result_pd_no_scale],
                                keys=['scale', 'not scale'])
-        extend_coef_result = pd.concat([extend_coef_pd_scale , extend_coef_pd_no_scale],
+        extend_coef_result = pd.concat([extend_coef_pd_scale, extend_coef_pd_no_scale],
                                keys=['scale', 'not scale'])
         all_result_filter.append(all_result)
         all_extend_coef_result.append(extend_coef_result)
 
-    all_result_filter_pd = pd.concat(all_result_filter, keys=['no_fcg','with_fcg']).reset_index()
-    all_result_filter_pd = all_result_filter_pd.rename(columns={'level_0':'fcg','level_1':'scale'})
+    all_result_filter_pd = pd.concat(all_result_filter, keys=['no_fcg', 'with_fcg']).reset_index()
+    all_result_filter_pd = all_result_filter_pd.rename(columns={'level_0': 'fcg', 'level_1': 'scale'})
     all_result_filter_pd = all_result_filter_pd.drop(columns='level_2')
-    all_result_filter_pd.to_csv('results/all_predition_result_cut.csv')
+    all_result_filter_pd.to_csv('results/module_ml_results/all_predition_result_{}.csv'.format(file_name), index=None)
 
     all_extend_coef_result_pd = pd.concat(all_extend_coef_result, keys=['no_fcg', 'with_fcg']).reset_index()
     all_extend_coef_result_pd = all_extend_coef_result_pd.rename(columns={'level_0': 'fcg', 'level_1': 'scale'})
     all_extend_coef_result_pd = all_extend_coef_result_pd.drop(columns='level_2')
-    all_extend_coef_result_pd.to_csv('results/all_extend_coef_result_cut.csv')
+    all_extend_coef_result_pd.to_csv('results/module_ml_results/all_extend_coef_result_{}.csv'.format(file_name), index=None)
+
+
 
 
 def main():
     dataset_Y = read_csv('data/gene_processed.csv', index_col=0)
     dataset_X = read_csv('data/drug_processed.csv', index_col=0)
-    dataset = pd.merge(dataset_X,dataset_Y, right_index=True, left_index=True,how='inner' )
-    drugs  = ['Bortezomib',
+    dataset = pd.merge(dataset_X, dataset_Y, right_index=True, left_index=True, how='inner')
+    drugs = ['Bortezomib',
               'Carfilzomib',
               'Ixazomib',
               'Oprozomib']
 
-    path_1 = 'resultsv1/'
-    path_2 = 'results/'
+    path_1 = 'results/module_ml_results/no_fcg/'
+    path_2 = 'results/module_ml_results/with_fcg/'
+    file_name = 'top_fea'
+    model_prediction([path_1, path_2], drugs, dataset, file_name, scale=True)
+    model_prediction([path_1, path_2], drugs, dataset, file_name, scale=False)
+    merge_result([path_1, path_2], file_name)
 
-    model_prediction([path_1, path_2], drugs, dataset, scale=True)
-    model_prediction([path_1, path_2], drugs, dataset, scale=False)
-    merge_result([path_1, path_2])
-
-    # linear_reuslt = pickle.load(open('results/linear_reuslt_scale'), 'rb')
+    # linear_reuslt = pickle.load(open('results/module_ml_results/with_fcg/linear_reuslt_top_fea_scale', 'rb'))
 
 

@@ -188,7 +188,7 @@ def validation_gene():
             #                              dataset_gene=dataset_gene_count,
             #                              type='DEG')
 
-            prepare_groups_by_commonpass_processed(table_dict[drug_type_name]['table_name'],dataset_gene_count,'DEG')
+            prepare_groups_by_commonpass_processed(table_dict[drug_type_name]['table_name'], dataset_gene_count,'DEG')
 
     def run_r(drug_type_name):
         # Define command and arguments
@@ -239,7 +239,7 @@ def cluster_patentis():
 
 if __name__ == "__main__":
     # validation_gene()
-    #cluster_patentis()
+    # cluster_patentis()
     # ml.main()
     # correlation_g_p.main()
     # surve_kaplanmeier.main()
@@ -249,5 +249,6 @@ if __name__ == "__main__":
     # geo_run_logrank.main()
     # geo_analysis_and_plot.main()
     # commpass_run_logrank.main()
-    commpass_plot_kmf.main()
+    # commpass_plot_kmf.main()
+    ml.main()
 
