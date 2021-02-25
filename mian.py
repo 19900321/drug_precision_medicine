@@ -158,7 +158,7 @@ def check_spearman():
         return r, pval
 
     drug = 'Bortezomib'
-    gene_2='ENSG00000000419'
+    gene_2 = 'ENSG00000000419'
     cor_get(drug, gene_2, drug_df, expr_df)
     cor_get(drug, gene_2, drug_df_2, expr_df_2)
 
