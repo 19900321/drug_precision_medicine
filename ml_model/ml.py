@@ -244,6 +244,7 @@ def test_one_drug(dataset, drug, final_columns_dict, type_index, scale):
     gene_coef_s = varibale_rank(clf,feature_selected, X_symbol_dict )
     return clf, MSE, coeffient, cor, p_value, gene_coef_s, feature_selected
 
+
 def drugs_prediction(drugs, dataset, final_columns_dict, scale):
     result_dict_all = {}
     type_index = [0, 1, 2]

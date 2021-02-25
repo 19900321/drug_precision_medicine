@@ -8,7 +8,7 @@ def prepare_file_dict_by_fimm(drugs, dataset_drug, dataset_gene):
     path_saved = 'results/mm/t_test/'
     if not os.path.exists(path_saved):
         os.mkdir(path_saved)
-    anno_gene_dict = pickle.load(open('results/commpass/ensembol_symbol_dict_commpass', 'rb'))
+    anno_gene_dict = pickle.load(open('results/mm/ensem_symbol_dict_mm', 'rb'))
     col_genes = list(set(['ENSG00000116497',
                  'ENSG00000143546',
                  'ENSG00000160678',

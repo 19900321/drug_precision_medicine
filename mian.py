@@ -231,8 +231,8 @@ def cluster_patentis():
     # drug_type_name = 'bortezomib_1'
     for drug_type_name in ['bortezomib_1', 'bortezomib_2', 'bortezomib_3','carf']:
         path_2 = 'results/'
-        for group_type in ['two_group','sub_group']:
-            for module_type in [0,1]:
+        for group_type in ['two_group', 'sub_group']:
+            for module_type in [0, 1]:
                 dataset_gene_count_selected, group_dict = prepare_pateints(dataset_gene_fpkm,drug_type_name, path_2,module_type, group_type)
                 cluster_pateints(dataset_gene_count_selected, group_dict, drug_type_name, module_type, group_type)
 

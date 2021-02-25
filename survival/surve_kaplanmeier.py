@@ -117,57 +117,58 @@ def compare_groups(gene_1, ttc, cens, g, pateint_group_dict, cut_percent, anno_g
     # Log-Rank Test
     results = cal_log_rank(data_h, data_l, ttc, cens)
 
-    # Plot the survival_function data :
-    fig = plt.figure(figsize=(8, 8))
-    gs = gridspec.GridSpec(4, 1)
-    ax1 = fig.add_subplot(gs[0:2, :])
-    kmf_h.plot_survival_function(ax=ax1)
-    kmf_l.plot_survival_function(ax=ax1)
-    ax1.set_xlabel("Times of {}".format(ttc))
-    ax1.set_ylabel(" {} (%)".format(cens))
-    ax1.set_title("KMF of {} {} from {} cut off {}".format(gene, g, data_soure, cut_percent))
+    if results.p_value < 0.1:
+        # Plot the survival_function data :
+        fig = plt.figure(figsize=(8, 8))
+        gs = gridspec.GridSpec(4, 1)
+        ax1 = fig.add_subplot(gs[0:2, :])
+        kmf_h.plot_survival_function(ax=ax1)
+        kmf_l.plot_survival_function(ax=ax1)
+        ax1.set_xlabel("Times of {}".format(ttc))
+        ax1.set_ylabel(" {} (%)".format(cens))
+        ax1.set_title("KMF of {} {} from {} cut off {}".format(gene, g, data_soure, cut_percent))
 
-    # Add a table at the bottom of the axes
+        # Add a table at the bottom of the axes
 
-    merged = pd.concat([data_h, data_l], axis=0)
+        merged = pd.concat([data_h, data_l], axis=0)
 
-    merged_pd = merged.groupby(['group']).agg({ttc: "mean", gene_1: 'mean', 'group': 'count'})
-    merged_pd = merged_pd.rename(columns={ttc: "Mean {}".format(ttc),
-                                          gene_1: 'Mean {}'.format(gene),
-                                          'group': 'The number of group'})
-    merged_pd = merged_pd.apply(lambda x: round(x, 2))
-    ax2 = fig.add_subplot(gs[2, :])
-    ax2.axis('off')
-    ax2.axis('tight')
-    table = ax2.table(cellText=merged_pd.values,
-                          rowLabels=list(merged_pd.index),
-                          colLabels=list(merged_pd.columns),
-                         cellLoc = 'center',
-                          loc='center')
-    table.set_fontsize(10)
-    table.scale(1.2, 1.2)
+        merged_pd = merged.groupby(['group']).agg({ttc: "mean", gene_1: 'mean', 'group': 'count'})
+        merged_pd = merged_pd.rename(columns={ttc: "Mean {}".format(ttc),
+                                              gene_1: 'Mean {}'.format(gene),
+                                              'group': 'The number of group'})
+        merged_pd = merged_pd.apply(lambda x: round(x, 2))
+        ax2 = fig.add_subplot(gs[2, :])
+        ax2.axis('off')
+        ax2.axis('tight')
+        table = ax2.table(cellText=merged_pd.values,
+                              rowLabels=list(merged_pd.index),
+                              colLabels=list(merged_pd.columns),
+                             cellLoc = 'center',
+                              loc='center')
+        table.set_fontsize(10)
+        table.scale(1.2, 1.2)
 
 
-    ax3 = fig.add_subplot(gs[3, :])
-    ax3.axis('off')
-    ax3.axis('tight')
-    result_statistic = results.summary
-    table_2 = ax3.table(cellText=result_statistic.values,
-                 rowLabels=['logrank test'],
-                 colLabels=list(result_statistic.columns),
-                 cellLoc='center',
-                 loc='center')
-    table_2.set_fontsize(10)
-    table_2.scale(1.1, 1.11)
-    plt.tight_layout()
-    # Adjust layout to make room for the table:
-    plt.subplots_adjust(left=0.2, bottom=0.2)
+        ax3 = fig.add_subplot(gs[3, :])
+        ax3.axis('off')
+        ax3.axis('tight')
+        result_statistic = results.summary
+        table_2 = ax3.table(cellText=result_statistic.values,
+                     rowLabels=['logrank test'],
+                     colLabels=list(result_statistic.columns),
+                     cellLoc='center',
+                     loc='center')
+        table_2.set_fontsize(10)
+        table_2.scale(1.1, 1.11)
+        plt.tight_layout()
+        # Adjust layout to make room for the table:
+        plt.subplots_adjust(left=0.2, bottom=0.2)
 
-    # save out
-    if not os.path.exists(path_saved):
-        os.makedirs(path_saved)
+        # save out
+        if not os.path.exists(path_saved):
+            os.makedirs(path_saved)
 
-    plt.savefig('{}/{}_{}_{}_{}_KMF_curve.png'.format(path_saved, g, gene, cens, cut_percent))
+        plt.savefig('{}/{}_{}_{}_{}_KMF_curve.png'.format(path_saved, g, gene, cens, cut_percent))
 
     # plot density
     # ax2 = plt.subplot(111)

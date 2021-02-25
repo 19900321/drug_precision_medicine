@@ -2,4 +2,4 @@
 
 from src import scripts as src
 
-reactome_genesets =src.get_reactome_genesets()
+reactome_genesets = src.get_reactome_genesets()

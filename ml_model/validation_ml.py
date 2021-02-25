@@ -32,30 +32,41 @@ def select_model(prediction_df, path):
 
     return best_model_dict
 
-
-def predict_commonpass(best_model_dict):
-    pateint_group_dict = pickle.load(open('results/commpass/subgroup/pateint_group_log_dict', 'rb'))
-
-    simple_name = {'Bortezomib': 'bor',
-                    'Carfilzomib': 'car',
-                   }
+# validate use fimm and apex
+def predict_commonpass(best_model_dict, pateint_group_dict, horet):
+    mm_anno_dict = pickle.load(open('results/mm/ensem_symbol_dict_mm', 'rb'))
+    geo_anno_dict = pickle.load(open('results/geo/id_symbol_dict_geo', 'rb'))
+    if horet == 'commpass':
+        simple_name = {'Bortezomib': 'bor',
+                        'Carfilzomib': 'car',
+                       }
+    elif horet == 'apex':
+        simple_name = {'Bortezomib': 'ps'
+                       }
 
     drugs = ['Bortezomib', 'Carfilzomib']
 
     pateint_group_dict_predicted = {}
+
     for drug in drugs:
         groups = [g for g in list(pateint_group_dict.keys()) if simple_name[drug] in g.lower()]
 
         for g in groups:
-            genes_selected = set(best_model_dict[drug]['feature_selected']) & set(pateint_group_dict[g]['gene_data'].columns)
-            gene_data = pateint_group_dict[g]['gene_data'][list(genes_selected)]
+            feature_selected = best_model_dict[drug]['feature_selected']
+            if horet == 'apex':
+                sym_selected = [mm_anno_dict.get(f) for f in feature_selected]
+                sym_geo = {v: k for k, v in geo_anno_dict.items() if not isinstance(v, float) and any([s in v for s in sym_selected])}
+                mm_geo_selected = {f: geo_anno_dict.get(mm_anno_dict.get(f)) for f in feature_selected}
 
-            model = best_model_dict[drug]['clf']
-            predicted = model.predict(gene_data)
-            pateint_data = pateint_group_dict[g]['patient_data']
-            pateint_data['predicted_response'] = predicted
-            pateint_group_dict_predicted[g] = {'gene_data': gene_data,
-                                               'pateint_data': pateint_data}
+            if all([c in pateint_group_dict[g]['gene_data'].columns for c in feature_selected] ):
+                gene_data = pateint_group_dict[g]['gene_data'][feature_selected]
+
+                model = best_model_dict[drug]['clf']
+                predicted = model.predict(gene_data)
+                pateint_data = pateint_group_dict[g]['patient_data']
+                pateint_data['predicted_response'] = predicted
+                pateint_group_dict_predicted[g] = {'gene_data': gene_data,
+                                                   'pateint_data': pateint_data}
 
     return pateint_group_dict_predicted
 
@@ -134,24 +145,33 @@ def evaluation_prediction(pateint_group_dict):
 
         # by split top 10, bottom 10 group
         ttc = 'ttcpfs'
-        cens= 'censpfs'
-        cut = 2
+        cens = 'censpfs'
+        cut = 3
         results = groups_cox(pateint_data, ttc, cens, cut)
         pateint_group_dict[g].update({'group_test': results._test_statistic[0],
                                       'group_p_vlue': results.p_value})
 
         # by reponse level
-        cor, p_value = repnose_level(pateint_data)
-        pateint_group_dict[g].update({'level_cor': cor,
-                                      'level_p_vlue': p_value})
+        # cor, p_value = repnose_level(pateint_data)
+        # pateint_group_dict[g].update({'level_cor': cor,
+        #                               'level_p_vlue': p_value})
 
         # by survival time of die patients
         cor_s, p_value_s = survival_time(pateint_data)
         pateint_group_dict[g].update({'pfs_cor': cor_s,
                                       'pfs_p_vlue': p_value_s})
 
-
     return pateint_group_dict
+
+
+def final_evalidat(best_model_dict, pateint_group_dict, type, path):
+
+    pateint_group_dict = predict_commonpass(best_model_dict, pateint_group_dict, type)
+    pickle.dump(pateint_group_dict, open(path + 'validate/{}/pateint_group_log_dict_prediected'.format(type), 'wb'))
+
+    pateint_group_dict_eval = evaluation_prediction(pateint_group_dict)
+    pickle.dump(pateint_group_dict_eval, open(path + 'validate/{}/pateint_group_dict_eval'.format(type), 'wb'))
+    return pateint_group_dict_eval
 
 
 def main():
@@ -159,12 +179,17 @@ def main():
     # prediction_df = pd.read_csv(path + 'all_predition_result_top_fea.csv')
     # best_model_dict = select_model(prediction_df, path)
     # pickle.dump(best_model_dict, open(path+'best_model_dict', 'wb'))
-    #
-    # pateint_group_dict = predict_commonpass(best_model_dict)
-    # pickle.dump(pateint_group_dict, open(path + 'validate/commonpass/pateint_group_log_dict_prediected', 'wb'))
+    best_model_dict = pickle.load(open(path + 'best_model_dict', 'rb'))
+    pateint_group_dict = pickle.load(open('results/commpass/subgroup/pateint_group_log_dict', 'rb'))
+    pateint_group_dict_eval = final_evalidat(best_model_dict,
+                                             pateint_group_dict,
+                                             'commpass',
+                                             path)
 
-    pateint_group_dict = pickle.load(open(path + 'validate/commonpass/pateint_group_log_dict_prediected', 'rb'))
+    # APEX
+    pateint_group_dict_apex = pickle.load(open('results/geo/subgroup/pateint_group_dict', 'rb'))
 
-    pateint_group_dict_eval = evaluation_prediction(pateint_group_dict)
-    pickle.dump(pateint_group_dict_eval, open(path + 'validate/commonpass/pateint_group_dict_eval', 'wb'))
-
+    pateint_group_dict_eval_apex = final_evalidat(best_model_dict,
+                                             pateint_group_dict_apex,
+                                             'apex',
+                                             path)
